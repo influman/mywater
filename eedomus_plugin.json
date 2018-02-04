@@ -1,0 +1,240 @@
+{
+	"plugin_id": "mywater",
+	"name_fr": "Conso. Eau",
+	"icon": "mywaterg.png",
+	"version": "2.0",
+	"creation_date": "2017-11-20",
+	"modification_date": "2018-01-19",
+	"author": "Influman",
+	"description_fr": "Suivi de la <b>consommation en eau</b>, depuis un état de consommation cumulé, en litres ou m3<br>",
+	"description_en": "",
+	"description_es": "",
+	"description_it": "",
+	"description_de": "",
+	"forum_link": "http://forum.eedomus.com/viewtopic.php?f=50&t=6163",
+	"parameters":
+  [
+		{
+			"parameter": "NAME", 
+			"description": "Nom du périphérique mesuré",
+			"xtype": "textfield",
+			"default_value": "Conso Eau",
+			"field": "width:200, allowBlank:false"
+		},
+		{
+    		"parameter": "APIC", 
+			"description": "Périphérique Consommation Cumulée...",
+    		"xtype": "combo",
+			"field": "store : getCombo('/json/list_all.php'), displayField: 'label', valueField: 'id', typeAhead: true, forceSelection: true, triggerAction: 'all', selectOnFocus: true, editable: false, shadow:true, mode: 'local', width: 250, listWidth: 300, allowBlank: true"
+		},
+		{
+    		"parameter": "UNIT", 
+			"description": "...exprimée en m3 ou en litres ?",
+    		"xtype": "combo",
+			"field": "store : ['m3', 'litres'], displayField: 'label', valueField: 'id', typeAhead: true, forceSelection: true, triggerAction: 'all', selectOnFocus: true, editable: false, shadow:true, mode: 'local', width: 250, listWidth: 300, allowBlank: true"
+		},
+		{
+			"parameter": "DELTA", 
+			"description": "Ecart avec le compteur réel",
+			"xtype": "textfield",
+			"default_value": "0",
+			"field": "width:150, allowBlank:false"
+		}		
+  ],
+	"scripts":
+	[
+		{
+			"name": "mywater.php"
+		}
+	],
+	"devices":
+  [
+		{
+			"device_id": "suiconso",
+			"module_id": "51",
+			"type": "http",
+			"name_fr": "plugin.parameters.NAME - Statut",
+			"icon": "mywaterg.png",
+			"utilisation_id": "35",
+			"parameters":
+			{
+				"VAR1": "plugin.parameters.APIC",
+				"VAR2": "plugin.parameters.UNIT",
+      			"VAR3": "plugin.parameters.DELTA",
+				"value_type": "string",
+				"ignore_errors": 3,
+				"RAW_URL": "http://localhost/script/?exec=mywater.php&apic=[VAR1]&unit=[VAR2]&delta=[VAR3]&action=updateconso",
+				"RAW_XPATH": "/MYWATER/STATUT",
+				"POLLING": "1"
+			}
+		},
+		{
+			"device_id": "compteur",
+			"parent_id": "suiconso",
+			"module_id": "51",
+			"type": "http",
+			"name_fr": "plugin.parameters.NAME - Compteur",
+			"icon": "mywaterg.png",
+			"utilisation_id": "35",
+			"parameters":
+			{
+				"VAR1": "plugin.parameters.APIC",
+				"VAR2": "plugin.parameters.UNIT",
+      			"VAR3": "plugin.parameters.DELTA",
+				"value_type": "string",
+				"ignore_errors": 3,
+				"RAW_URL": "http://localhost/script/?exec=mywater.php&apic=[VAR1]&unit=[VAR2]&delta=[VAR3]&action=read&value=cpt_delta_global",
+				"RAW_XPATH": "/MYWATER/CPT_DELTA_GLOBAL",
+				"POLLING": "1"
+			}
+		},
+		{
+			"device_id": "abo",
+			"parent_id": "suiconso",
+			"module_id": "41",
+			"type": "http",
+			"name_fr": "plugin.parameters.NAME - Prix",
+			"icon": "mywatermoney.png",
+			"utilisation_id": "43",
+			"parameters":
+			{
+				"VAR1": "plugin.parameters.APIC",
+				"VAR2": "plugin.parameters.UNIT",
+      			"VAR3": "plugin.parameters.DELTA",
+				"value_type": "list",
+				"ignore_errors": 3,
+				"RAW_URL": "http://localhost/script/?exec=mywater.php&apic=[VAR1]&unit=[VAR2]&delta=[VAR3]&action=updatetarif&type=abo&value=poll",
+				"RAW_XPATH": "/MYWATER/ABO",
+				"POLLING": "1"
+			},
+			"values":
+			[
+				{ "value": "3.4164", "description": "PARIS 3.4164 eur/m3", "icon": "mywatermoney.png", "http_url": "http://localhost/script/?exec=mywater.php", "http_type": "GET",  "http_params": "&apic=[VAR1]&unit=[VAR2]&delta=[VAR3]&action=updatetarif&type=abo&value=[RAW_VALUE]" },
+				{ "value": "3.11", "description": "LYON 3.11 eur/m3", "icon": "mywatermoney.png", "http_url": "http://localhost/script/?exec=mywater.php", "http_type": "GET",  "http_params": "&apic=[VAR1]&unit=[VAR2]&delta=[VAR3]&action=updatetarif&type=abo&value=[RAW_VALUE]" },
+				{ "value": "3.56", "description": "MARSEILLE 3.56 eur/m3", "icon": "mywatermoney.png", "http_url": "http://localhost/script/?exec=mywater.php", "http_type": "GET",  "http_params": "&apic=[VAR1]&unit=[VAR2]&delta=[VAR3]&action=updatetarif&type=abo&value=[RAW_VALUE]" },
+				{ "value": "3.53", "description": "BORDEAUX 3.53 eur/m3", "icon": "mywatermoney.png", "http_url": "http://localhost/script/?exec=mywater.php", "http_type": "GET",  "http_params": "&apic=[VAR1]&unit=[VAR2]&delta=[VAR3]&action=updatetarif&type=abo&value=[RAW_VALUE]" },
+				{ "value": "9999", "description": "RAZ Attention", "icon": "mywatermoney.png", "http_url": "http://localhost/script/?exec=mywater.php", "http_type": "GET",  "http_params": "&apic=[VAR1]&unit=[VAR2]&delta=[VAR3]&action=raz" }
+			]
+		 },
+		{
+			"device_id": "jourglobal",
+			"parent_id": "suiconso",
+			"module_id": "51",
+			"type": "http",
+			"name_fr": "plugin.parameters.NAME - Jour",
+			"icon": "mywaterjourg.png",
+			"utilisation_id": "35",
+			"parameters":
+			{
+				"VAR1": "plugin.parameters.APIC",
+				"VAR2": "plugin.parameters.UNIT",
+      			"VAR3": "plugin.parameters.DELTA",
+				"value_type": "string",
+				"ignore_errors": 3,
+				"RAW_URL": "http://localhost/script/?exec=mywater.php&apic=[VAR1]&unit=[VAR2]&delta=[VAR3]&action=read&value=jour_global",
+				"RAW_XPATH": "concat(/MYWATER/JOUR_GLOBAL, 'm3 (', /MYWATER/JOUR_GLOBALC, 'eur)')",
+				"POLLING": "1"
+			}
+		},
+		{
+			"device_id": "moisglobal",
+			"parent_id": "suiconso",
+			"module_id": "51",
+			"type": "http",
+			"name_fr": "plugin.parameters.NAME - Mois",
+			"icon": "mywatermoisg.png",
+			"utilisation_id": "35",
+			"parameters":
+			{
+				"VAR1": "plugin.parameters.APIC",
+				"VAR2": "plugin.parameters.UNIT",
+      			"VAR3": "plugin.parameters.DELTA",
+				"value_type": "string",
+				"ignore_errors": 3,
+				"RAW_URL": "http://localhost/script/?exec=mywater.php&apic=[VAR1]&unit=[VAR2]&delta=[VAR3]&action=read&value=mois_global",
+				"RAW_XPATH": "concat(/MYWATER/MOIS_GLOBAL, 'm3 (', /MYWATER/MOIS_GLOBALC, 'eur)')",
+				"POLLING": "1"
+			}
+		},
+		{
+			"device_id": "anneeglobal",
+			"parent_id": "suiconso",
+			"module_id": "51",
+			"type": "http",
+			"name_fr": "plugin.parameters.NAME - Année",
+			"icon": "mywaterang.png",
+			"utilisation_id": "35",
+			"parameters":
+			{
+				"VAR1": "plugin.parameters.APIC",
+				"VAR2": "plugin.parameters.UNIT",
+      			"VAR3": "plugin.parameters.DELTA",
+				"value_type": "string",
+				"ignore_errors": 3,
+				"RAW_URL": "http://localhost/script/?exec=mywater.php&apic=[VAR1]&unit=[VAR2]&delta=[VAR3]&action=read&value=annee_global",
+				"RAW_XPATH": "concat(/MYWATER/ANNEE_GLOBAL, 'm3 (', /MYWATER/ANNEE_GLOBALC, 'eur)')",
+				"POLLING": "1"
+			}
+		},
+		{
+			"device_id": "moisprecglobal",
+			"parent_id": "suiconso",
+			"module_id": "51",
+			"type": "http",
+			"name_fr": "plugin.parameters.NAME - M-1",
+			"icon": "mywatermoisprecg.png",
+			"utilisation_id": "35",
+			"parameters":
+			{
+				"VAR1": "plugin.parameters.APIC",
+				"VAR2": "plugin.parameters.UNIT",
+      			"VAR3": "plugin.parameters.DELTA",
+				"value_type": "string",
+				"ignore_errors": 3,
+				"RAW_URL": "http://localhost/script/?exec=mywater.php&apic=[VAR1]&unit=[VAR2]&delta=[VAR3]&action=read&value=mois_prec_global",
+				"RAW_XPATH": "concat(/MYWATER/MOIS_PREC_GLOBAL, 'm3 (', /MYWATER/MOIS_PREC_GLOBALC, 'eur)')",
+				"POLLING": "1"
+			}
+		},
+		{
+			"device_id": "anprecglobal",
+			"parent_id": "suiconso",
+			"module_id": "51",
+			"type": "http",
+			"name_fr": "plugin.parameters.NAME - A-1",
+			"icon": "mywateranprecg.png",
+			"utilisation_id": "35",
+			"parameters":
+			{
+				"VAR1": "plugin.parameters.APIC",
+				"VAR2": "plugin.parameters.UNIT",
+      			"VAR3": "plugin.parameters.DELTA",
+				"value_type": "string",
+				"ignore_errors": 3,
+				"RAW_URL": "http://localhost/script/?exec=mywater.php&apic=[VAR1]&unit=[VAR2]&delta=[VAR3]&action=read&value=annee_prec_global",
+				"RAW_XPATH": "concat(/MYWATER/ANNEE_PREC_GLOBAL, 'm3 (', /MYWATER/ANNEE_PREC_GLOBALC, 'eur)')",
+				"POLLING": "1"
+			}
+		},
+		{
+			"device_id": "jprecglobal",
+			"parent_id": "suiconso",
+			"module_id": "51",
+			"type": "http",
+			"name_fr": "plugin.parameters.NAME - J-1",
+			"icon": "mywaterjourprecg.png",
+			"utilisation_id": "35",
+			"parameters":
+			{
+				"VAR1": "plugin.parameters.APIC",
+				"VAR2": "plugin.parameters.UNIT",
+      			"VAR3": "plugin.parameters.DELTA",
+				"value_type": "string",
+				"ignore_errors": 3,
+				"RAW_URL": "http://localhost/script/?exec=mywater.php&apic=[VAR1]&unit=[VAR2]&delta=[VAR3]&action=read&value=jour_prec_global",
+				"RAW_XPATH": "concat(/MYWATER/JOUR_PREC_GLOBAL, 'm3 (', /MYWATER/JOUR_PREC_GLOBALC, 'eur)')",
+				"POLLING": "1"
+			}
+		}
+	]
+}
